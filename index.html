@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Filozofların Sosyal Medyası</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/billabong');
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body, html { height: 100%; width: 100%; overflow: hidden; position: fixed; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background: #000; color: white; }
+        
+        #phone-wrapper { 
+            width: 100%; 
+            height: 100%; 
+            max-width: 650px; 
+            margin: 0 auto; 
+            position: relative; 
+            background: #000; 
+            overflow: hidden; 
+        }
+
+        #intro-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; }
+        #intro-layer video { width: 100%; height: 100%; object-fit: cover; }
+
+        #home-screen { width: 100%; height: 100%; background: url('arkaplan.jpg') center/cover; padding: 60px 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; z-index: 1; position: absolute; }
+        .app-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .app-icon { width: 66px; height: 66px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+        .icon-wa { background: linear-gradient(#25D366, #128C7E); }
+        .icon-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+        .app-label { color: white; font-size: 13px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+
+        .full-app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; visibility: hidden; }
+        .full-app.active { transform: translateY(0); visibility: visible; }
+
+        /* WHATSAPP */
+        #wa-app { background-color: #e5ddd5; }
+        .wa-header { background: #075E54; color: white; height: 65px; display: flex; align-items: center; padding: 0 12px; gap: 10px; flex-shrink: 0; }
+        .wa-header img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+        
+        .wa-chat-list { flex: 1; overflow-y: auto; background: white; }
+        .wa-chat-item { display: flex; padding: 12px 15px; gap: 15px; cursor: pointer; align-items: center; border-bottom: 1px solid #f2f2f2; }
+        .wa-chat-item:active { background: #f5f5f5; }
+        .wa-chat-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .wa-chat-info { flex: 1; display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
+        .wa-chat-row { display: flex; justify-content: space-between; align-items: center; }
+        .wa-chat-row b { font-size: 16px; color: #000; }
+        .wa-chat-time { font-size: 12px; color: #667781; }
+        .wa-chat-preview { font-size: 14px; color: #667781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .wa-chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: 600px !important; background-repeat: repeat; }
+        .wa-date-label { align-self: center; background: #e1f3fb; color: #54656f; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; margin: 15px 0; display: block; width: fit-content; }
+        .wa-msg { max-width: 82%; padding: 8px 12px 10px; font-size: 15.5px; position: relative; box-shadow: 0 1.2px 1px rgba(0,0,0,0.18); margin-bottom: 4px; color: #000; background: white; border-radius: 0 10px 10px 10px; align-self: flex-start; }
+        .wa-sent { align-self: flex-end; background: #e7ffdb; border-radius: 10px 0 10px 10px; }
+        .wa-time { font-size: 10px; color: #667781; float: right; margin: 5px 0 0 10px; display: flex; align-items: center; gap: 3px; }
+        .wa-status-blue { color: #34b7f1 !important; font-weight: bold; }
+        .blue-tick { color: #34b7f1 !important; }
+        .wa-input-area { background: #f0f2f5; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+        .wa-input-wrap { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; }
+        .wa-input-box { flex: 1; border: none; outline: none; padding: 12px 0; font-size: 16px; background: transparent; color: #000; }
+        .wa-send-btn { background: #00a884; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 20px; }
+        .wa-group-sender { font-size: 12.5px; font-weight: bold; margin-bottom: 3px; }
+
+        /* INSTAGRAM */
+        #ig-app { background: #000; }
+        .ig-nav { height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 0.1px solid #262626; background: #000; flex-shrink: 0; z-index: 10; width: 100%; }
+        .ig-main-content { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        #ig-feed-scroll { flex: 1; overflow-y: auto; }
+        .ig-stories { display: flex; gap: 15px; padding: 12px; overflow-x: auto; border-bottom: 0.1px solid #262626; scrollbar-width: none; }
+        .ig-story-item { display: flex; flex-direction: column; align-items: center; min-width: 75px; }
+        .ring-colorful { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); display: flex; align-items: center; justify-content: center; }
+        .ring-colorful img { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #000; object-fit: cover; }
+        
+        .ig-post { border-bottom: 0.1px solid #262626; padding-bottom: 15px; }
+        .p-header { display: flex; align-items: center; padding: 10px; gap: 10px; }
+        .p-header img { width: 32px; height: 32px; border-radius: 50%; }
+        
+        .p-img { background: #000; display: flex; align-items: center; justify-content: center; }
+        .p-img img { width: 100%; height: auto; max-height: 600px; object-fit: contain; display: block; }
+        .p-caption { padding: 0 12px; font-size: 14px; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; padding-bottom: 10px; }
+        
+        .p-actions { padding: 12px; display: flex; align-items: center; gap: 18px; font-size: 22px; color: white; }
+        .active-heart { color: #ff3040 !important; }
+
+        /* REELS */
+        #ig-reels-scroll { display: none; height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; background: #000; scrollbar-width: none; }
+        #ig-reels-scroll::-webkit-scrollbar { display: none; }
+        .reels-v-block { height: 100%; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; position: relative; display: flex; align-items: center; justify-content: center; }
+        .reels-v-block video { width: 100%; height: 100%; object-fit: cover; }
+        
+        .reels-ui { position: absolute; right: 15px; bottom: 85px; display: flex; flex-direction: column; gap: 22px; align-items: center; z-index: 10; color: white; }
+        .reels-ui-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .reels-ui-item i { font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); cursor: pointer; }
+        .reels-ui-item span { font-size: 12px; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+        .reels-user { position: absolute; left: 15px; bottom: 30px; display: flex; flex-direction: column; gap: 6px; z-index: 10; color: white; }
+        .reels-user-row { display: flex; align-items: center; gap: 10px; }
+        .reels-user img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; }
+        .reels-cap { font-size: 14px; margin-left: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+        /* PROFİL */
+        #ig-profile-scroll { display: none; flex: 1; overflow-y: auto; background: #000; }
+        .prof-header-top { padding: 15px; display: flex; align-items: center; justify-content: space-between; font-size: 20px; font-weight: bold; }
+        .prof-info-row { padding: 10px 15px; display: flex; align-items: center; gap: 25px; }
+        .prof-avatar-wrap { position: relative; width: 85px; height: 85px; }
+        .prof-avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; border: 1px solid #262626; }
+        .stats-wrap { flex: 1; display: flex; justify-content: space-around; text-align: center; }
+        .stat-item b { display: block; font-size: 17px; }
+        .stat-item span { font-size: 14px; color: #a8a8a8; }
+        .prof-bio { padding: 0 15px; font-size: 14px; line-height: 1.5; }
+        .prof-bio b { display: block; font-size: 15px; }
+        .prof-buttons { padding: 15px; display: flex; gap: 8px; }
+        .prof-btn { flex: 1; background: #1a1a1a; padding: 8px; text-align: center; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .grid-item { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        .ig-footer { height: 55px; border-top: 0.1px solid #262626; display: flex; align-items: center; justify-content: space-around; font-size: 24px; background: #000; flex-shrink: 0; z-index: 110; }
+        .ig-footer img { width: 26px; height: 26px; border-radius: 50%; border: 1px solid white; cursor: pointer; }
+
+        /* HİKAYE OVERLAY */
+        #story-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 3000; display: none; flex-direction: column; overflow: hidden; }
+        #story-bars-wrap { position: absolute; top: 8px; left: 0; width: 100%; padding: 0 5px; display: flex; gap: 4px; z-index: 3006; }
+        .story-seg-bar { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .story-seg-fill { height: 100%; background: #fff; width: 0%; }
+        
+        .story-header { padding: 20px 10px; display: flex; align-items: center; gap: 10px; z-index: 3005; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); margin-top: 10px; position: absolute; top: 0; width: 100%; }
+        #story-user-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #fff; }
+        #story-user-name { flex: 1; font-size: 14px; color: white; text-shadow: 0 1px 2px #000; font-weight: 600; }
+        
+        .story-tap-left { position: absolute; top: 0; left: 0; width: 30%; height: 100%; z-index: 3002; }
+        .story-tap-right { position: absolute; top: 0; right: 0; width: 70%; height: 100%; z-index: 3002; }
+
+        .story-bg-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #443c3a, #1a1a1a); padding: 0 25px; position: relative; height: 100%; width: 100%; }
+        .shared-post-card { width: 100%; max-width: 380px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.4); z-index: 3001; position: relative; }
+        .shared-post-header { padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+        .shared-post-header img { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #e1e1e1; object-fit: cover; }
+        .shared-post-header b { font-size: 13px; color: #000; }
+        .shared-post-img-wrap { background: #fafafa; display: flex; align-items: center; justify-content: center; border-top: 0.5px solid #efefef; }
+        .shared-post-img-wrap img { width: 100%; max-height: 480px; object-fit: contain; display: block; }
+
+        /* PROFİL GÖNDERİLERİ SAYFASI */
+        #profile-post-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2500; display: none; flex-direction: column; overflow: hidden; }
+        #profile-post-content { flex: 1; overflow-y: auto; scrollbar-width: none; position: relative; padding-bottom: 60px; }
+        #profile-post-content::-webkit-scrollbar { display: none; }
+
+        /* DM PAGE STYLES */
+        #ig-dm-page { display: fixed; flex-direction: column; background: #000; height: 100%; width: 100%; position: absolute; top: 0; left: 0; z-index: 200; }
+        .dm-header { height: 55px; display: flex; align-items: center; padding: 0 15px; gap: 20px; border-bottom: 0.1px solid #262626; flex-shrink: 0; }
+        .dm-header b { flex: 1; font-size: 18px; }
+        .dm-search { background: #121212; margin: 15px; padding: 8px 15px; border-radius: 10px; display: flex; align-items: center; gap: 10px; color: #8e8e8e; flex-shrink: 0; }
+        .dm-search input { background: transparent; border: none; outline: none; color: white; flex: 1; }
+        .dm-list { flex: 1; overflow-y: auto; }
+        .dm-item { display: flex; align-items: center; padding: 12px 15px; gap: 12px; cursor: pointer; transition: background 0.2s; }
+        .dm-item:active { background: #1a1a1a; }
+        .dm-item img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+        .dm-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .dm-user { font-weight: 500; font-size: 15px; }
+        .dm-msg-preview { font-size: 13px; color: #a8a8a8; }
+        .dm-active-dot { width: 12px; height: 12px; background: #00d95f; border: 2px solid black; border-radius: 50%; position: absolute; bottom: 0; right: 0; }
+        .dm-unread-dot { width: 8px; height: 8px; background: #0095f6; border-radius: 50%; }
+
+        /* DM SOHBET EKRANI */
+        #dm-chat-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 300; display: none; flex-direction: column; }
+        .chat-header { height: 60px; display: flex; align-items: center; padding: 0 15px; gap: 15px; border-bottom: 0.1px solid #262626; flex-shrink: 0; }
+        .chat-header img { width: 35px; height: 35px; border-radius: 50%; }
+        .chat-content { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 75%; padding: 10px 15px; border-radius: 20px; font-size: 14px; line-height: 1.4; }
+        .chat-received { align-self: flex-start; background: #262626; color: white; }
+        .chat-sent { align-self: flex-end; background: #3797f0; color: white; }
+        .dm-chat-input-area { background: #000; padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-top: 0.1px solid #262626; flex-shrink: 0; }
+        .dm-chat-input-wrap { flex: 1; background: #262626; border-radius: 20px; display: flex; align-items: center; padding: 0 15px; }
+        .dm-chat-input-box { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 14px; background: transparent; color: white; }
+        .dm-chat-send-btn { background: transparent; color: #0095f6; border: none; font-weight: 600; font-size: 14px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="phone-wrapper">
+    
+    <div id="intro-layer">
+        
+        <div id="start-overlay" onclick="startIntro(event)" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100000; color:white; cursor:pointer;">
+            <div style="width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:15px; box-shadow:0 0 20px rgba(255,255,255,0.1);">
+                <i class="fa-solid fa-play" style="margin-left:5px;"></i>
+            </div>
+            <h3 style="font-weight:500; letter-spacing:1px; text-shadow:0 2px 4px #000;">Simülasyonu Başlat</h3>
+        </div>
+        
+        <div id="skip-overlay" onclick="closeIntro(event)" style="position:absolute; top:30px; right:20px; z-index:99999; color:white; background:rgba(0,0,0,0.5); padding:8px 15px; border-radius:20px; font-size:14px; display:none; cursor:pointer;">
+            Geç <i class="fa-solid fa-forward-step" style="margin-left:5px;"></i>
+        </div>
+
+        <video id="intro-video" src="intro.mp4" playsinline preload="auto" onended="closeIntro()"></video>
+    </div>
+
+    <div id="home-screen">
+        <div class="app-item" onclick="toggleApp('wa-app', true)">
+            <div class="app-icon icon-wa"><i class="fa-brands fa-whatsapp"></i></div>
+            <span class="app-label">WhatsApp</span>
+        </div>
+        <div class="app-item" onclick="toggleApp('ig-app', true)">
+            <div class="app-icon icon-ig"><i class="fa-brands fa-instagram"></i></div>
+            <span class="app-label">Instagram</span>
+        </div>
+    </div>
+
+    <div id="wa-app" class="full-app">
+        
+        <div id="wa-list-page" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="wa-header" style="justify-content: space-between;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <i class="fa-solid fa-arrow-left" onclick="toggleApp('wa-app', false)" style="cursor:pointer;"></i>
+                    <b style="font-size: 18px;">WhatsApp</b>
+                </div>
+                <div style="display:flex; gap:18px; font-size:18px;">
+                    <i class="fa-solid fa-camera"></i>
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </div>
+            </div>
+            
+            <div class="wa-chat-list">
+                <div class="wa-chat-item" onclick="openWaChat('group', 'Agora 🏛️', 'https://cdn-icons-png.flaticon.com/512/1239/1239525.png')">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #00a884; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0;"><i class="fa-solid fa-users"></i></div>
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Agora 🏛️</b><span class="wa-chat-time">15:05</span></div>
+                        <div class="wa-chat-preview">Nietzsche: Kant, o köle ahlakını al ve...</div>
+                    </div>
+                </div>
+
+                <div class="wa-chat-item" onclick="openWaChat('sokrates', 'Sokrates', 'sokrates_profil.jpg')">
+                    <img src="sokrates_profil.jpg">
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Sokrates</b><span class="wa-chat-time">14:53</span></div>
+                        <div class="wa-chat-preview">Selam dostum. Bugün erdemin doğasını...</div>
+                    </div>
+                </div>
+                <div class="wa-chat-item" onclick="openWaChat('nietzsche', 'Nietzsche', 'nietzsche_profil.jpg')">
+                    <img src="nietzsche_profil.jpg">
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Nietzsche</b><span class="wa-chat-time">13:20</span></div>
+                        <div class="wa-chat-preview">İnsan aşılması gereken bir varlıktır!</div>
+                    </div>
+                </div>
+                <div class="wa-chat-item" onclick="openWaChat('kant', 'Immanuel Kant', 'kant_profil.jpg')">
+                    <img src="kant_profil.jpg">
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Immanuel Kant</b><span class="wa-chat-time">Dün</span></div>
+                        <div class="wa-chat-preview">Ahlak yasası bugün de bana rehberlik ediyor.</div>
+                    </div>
+                </div>
+                <div class="wa-chat-item" onclick="openWaChat('platon', 'Platon', 'platon_profil.jpg')">
+                    <img src="platon_profil.jpg">
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Platon</b><span class="wa-chat-time">Dün</span></div>
+                        <div class="wa-chat-preview">Bu ekrandakiler sadece birer gölge dostum...</div>
+                    </div>
+                </div>
+                <div class="wa-chat-item" onclick="openWaChat('marx', 'Karl Marx', 'marx_profil.jpg')">
+                    <img src="marx_profil.jpg">
+                    <div class="wa-chat-info">
+                        <div class="wa-chat-row"><b>Karl Marx</b><span class="wa-chat-time">Pazartesi</span></div>
+                        <div class="wa-chat-preview">Tarih, sınıf mücadelelerinin tarihidir yoldaş!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wa-chat-view" style="display: none; flex-direction: column; height: 100%;">
+            <div class="wa-header">
+                <i class="fa-solid fa-arrow-left" onclick="closeWaChat()" style="cursor:pointer;"></i>
+                <img id="wa-chat-user-img" src="">
+                <div style="flex:1">
+                    <b id="wa-chat-user-name">İsim</b>
+                    <small id="wa-status" style="display:block; color:#cfdfdd; font-size:12px;">çevrimiçi</small>
+                </div>
+                <div style="display:flex; gap:20px; font-size:18px; color:white; padding-right:5px;"><i class="fa-solid fa-video"></i><i class="fa-solid fa-phone"></i></div>
+            </div>
+            
+            <div class="wa-chat" id="wa-chatArea">
+                </div>
+            
+            <div class="wa-input-area">
+                <div class="wa-input-wrap"><input type="text" class="wa-input-box" id="wa-input" placeholder="Mesaj yazın" oninput="toggleWaBtn()"></div>
+                <button class="wa-send-btn" id="wa-send-btn-el" onclick="waSend()"><i class="fa-solid fa-paper-plane" id="wa-icon"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ig-app" class="full-app">
+        <div id="ig-feed-nav" class="ig-nav">
+          <i class="fa-solid fa-chevron-left" onclick="toggleApp('ig-app', false)" style="font-size: 20px; margin-right: 15px;"></i>
+            <div style="font-size: 20px; font-weight: 700;">Senin için <i class="fa-solid fa-chevron-down" style="font-size:12px;"></i></div>
+            <div style="display:flex; gap:22px;">
+                <i class="fa-regular fa-heart"></i>
+                <i class="fa-brands fa-facebook-messenger" onclick="toggleDM(true)"></i>
+            </div>
+        </div>
+
+        <div class="ig-main-content">
+            <div id="ig-feed-scroll">
+                <div class="ig-stories" id="story-bar">
+                    <div class="ig-story-item" onclick="openStory('eda')"><div class="ring-colorful"><img src="eda_profil.jpg"></div><span>Hikayen</span></div>
+                    <div class="ig-story-item" onclick="openStory('sokrates')"><div class="ring-colorful"><img src="sokrates_profil.jpg"></div><span>Sokrates</span></div>
+                    <div class="ig-story-item" onclick="openStory('nietzsche')"><div class="ring-colorful"><img src="nietzsche_profil.jpg"></div><span>Nietzsche</span></div>
+                    <div class="ig-story-item" onclick="openStory('kant')"><div class="ring-colorful"><img src="kant_profil.jpg"></div><span>Kant</span></div>
+                    <div class="ig-story-item" onclick="openStory('platon')"><div class="ring-colorful"><img src="platon_profil.jpg"></div><span>Platon</span></div>
+                    <div class="ig-story-item" onclick="openStory('marx')"><div class="ring-colorful"><img src="marx_profil.jpg"></div><span>Marx</span></div>
+                </div>
+                
+                <div id="post-container">
+                    <div class="ig-post">
+                        <div class="p-header"><img src="sokrates_profil.jpg"><b>sokrates_official</b></div>
+                        <div class="p-img"><img src="post1.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>sokrates_official</b> Sokakta gençler bana laf ediyo😡 Çıkar telefonunu göster diyorum mum gibi kalıyolar😎 </div>
+                    </div>
+                    <div class="ig-post">
+                        <div class="p-header"><img src="nietzsche_profil.jpg"><b>f_nietzsche</b></div>
+                        <div class="p-img"><img src="post2.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>f_nietzsche</b> Varlık yok dedim, beni akıl hastanesine kapattılar 😭 BEN DELİ DEĞİLİM!!!</div>
+                    </div>
+                    <div class="ig-post">
+                        <div class="p-header"><img src="kant_profil.jpg"><b>immanuel_kant</b></div>
+                        <div class="p-img"><img src="post3.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>immanuel_kant</b> 200 Yaşındayım hala tam akpil basıyorum😡 Adalet istiyorum!!! #İBB #Akpil</div>
+                    </div>
+                    <div class="ig-post">
+                        <div class="p-header"><img src="platon_profil.jpg"><b>platon_akademi</b></div>
+                        <div class="p-img"><img src="post4.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>platon_akademi</b> Siz hala 1080p ekranda dizi izleyip gerçek sanın NPC'ler... Ben İdealar Dünyası'nda 8K Ultra HD yaşıyorum. Mağaranızdaki gölgelerle mutluluklar dilerim. 🥽⛓️ #MağaraAlegorisi #Uyanın</div>
+                    </div>
+                    <div class="ig-post">
+                        <div class="p-header"><img src="marx_profil.jpg"><b>karl_marx</b></div>
+                        <div class="p-img"><img src="post5.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>karl_marx</b> Hem kahveye 200 TL alıp parama çöküyorlar, hem de ismime Makas yazıyor hatsizler! Kapitalizm insanı kendi kahvesine bile yabancılaştırıyor yoldaşlar... ☕🤬 #starbucks #KahrolsunSistem</div>
+                    </div>
+                    <div class="ig-post">
+                        <div class="p-header"><img src="sokrates_profil.jpg"><b>sokrates_official</b></div>
+                        <div class="p-img"><img src="post6.jpg"></div>
+                        <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="p-caption"><b>sokrates_official</b> Jüri bana yine bu yeşil detoks suyunu kilitledi. Tek suçum Atina gençlerinin aklını kullanmasını sağlamaktı... Bildiğim tek şey midemin bulandığı. 🤢🌿 #CancelSokrates #Baldıran</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ig-profile-scroll">
+                <div class="prof-header-top"><i class="fa-solid fa-plus-square"></i><span>smartalec_82 <i class="fa-solid fa-chevron-down" style="font-size:12px;"></i></span><i class="fa-solid fa-bars"></i></div>
+                <div class="prof-info-row">
+                    <div class="prof-avatar-wrap"><img src="eda_profil.jpg"></div>
+                    <div class="stats-wrap">
+                        <div class="stat-item"><b>2</b><span>gönderi</span></div>
+                        <div class="stat-item"><b>3.1M</b><span>takipçi</span></div>
+                        <div class="stat-item"><b>0</b><span>takip</span></div>
+                    </div>
+                </div>
+                <div class="prof-bio"><b>Eda</b><span>Önce haddini bil !!! Yunan filozoflar dm😘</span></div>
+                <div class="prof-buttons"><div class="prof-btn">Profili düzenle</div><div class="prof-btn">Profili paylaş</div></div>
+                <div class="grid-3x3" id="profile-grid">
+                    <div class="grid-item" onclick="openProfilePost(0)"><img src="filozof_ekstra1.jpg"></div>
+                    <div class="grid-item" onclick="openProfilePost(1)"><img src="filozof_ekstra2.jpg"></div>
+                </div>
+            </div>
+
+            <div id="ig-reels-scroll" onscroll="handleReelsScroll()">
+                <div class="reels-v-block">
+                    <video loop playsinline src="video1.mp4" onclick="this.paused?this.play():this.pause()"></video>
+                    <div class="reels-user">
+                        <div class="reels-user-row"><img src="sokrates_profil.jpg"><b>sokrates_official</b></div>
+                        <div class="reels-cap">Bu devirde güvercin kullanan kaldımı ya 🙄😤 </div>
+                    </div>
+                    <div class="reels-ui">
+                        <div class="reels-ui-item"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><span>20,1 B</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-comment"></i><span>432</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-paper-plane"></i><span>1.701</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-bookmark"></i><span>4.908</span></div>
+                    </div>
+                </div>
+                <div class="reels-v-block">
+                    <video loop playsinline src="video2.mp4" onclick="this.paused?this.play():this.pause()"></video>
+                    <div class="reels-user">
+                        <div class="reels-user-row"><img src="nietzsche_profil.jpg"><b>f_nietzsche</b></div>
+                        <div class="reels-cap">YA NİYE KİMSE BANA İNANMIYO VARLIK YOK VALLA YOK😭</div>
+                    </div>
+                    <div class="reels-ui">
+                        <div class="reels-ui-item"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><span>900K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-comment"></i><span>10K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-paper-plane"></i><span>5K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-bookmark"></i><span>2K</span></div>
+                    </div>
+                </div>
+                <div class="reels-v-block">
+                    <video loop playsinline src="video4.mp4" onclick="this.paused?this.play():this.pause()"></video>
+                    <div class="reels-user">
+                        <div class="reels-user-row"><img src="platon_profil.jpg"><b>platon_akademi</b></div>
+                        <div class="reels-cap">️İdealar dünyasındaki daha gerçek ağlayın 🙄</div>
+                    </div>
+                    <div class="reels-ui">
+                        <div class="reels-ui-item"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><span>700K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-comment"></i><span>3K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-bookmark"></i></div>
+                    </div>
+                </div>
+                <div class="reels-v-block">
+                    <video loop playsinline src="video5.mp4" onclick="this.paused?this.play():this.pause()"></video>
+                    <div class="reels-user">
+                        <div class="reels-user-row"><img src="marx_profil.jpg"><b>karl_marx</b></div>
+                        <div class="reels-cap">Yarım ekmek nasıl 75 milyon kapıya yazmışşınız 35 milyon 😡 #kapitalizm </div>
+                    </div>
+                    <div class="reels-ui">
+                        <div class="reels-ui-item"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><span>650K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-comment"></i><span>2K</span></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-paper-plane"></i></div>
+                        <div class="reels-ui-item"><i class="fa-regular fa-bookmark"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ig-dm-page" style="display: none;">
+                <div class="dm-header">
+                    <i class="fa-solid fa-arrow-left" onclick="toggleDM(false)"></i>
+                    <b>smartalec_82</b>
+                    <div style="display:flex; gap:20px; font-size:18px;"><i class="fa-solid fa-video"></i><i class="fa-solid fa-pen-to-square"></i></div>
+                </div>
+                <div class="dm-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search or ask Meta AI">
+                </div>
+                <div class="dm-list">
+                    <div class="dm-item" onclick="openDMChat('f_nietzsche', 'nietzsche_profil.jpg', 'nietzsche')">
+                        <div style="position:relative"><img src="nietzsche_profil.jpg"><div class="dm-active-dot"></div></div>
+                        <div class="dm-info"><span class="dm-user">f_nietzsche</span><span class="dm-msg-preview">Ahlak putlarını yıkmalıyız!</span></div>
+                        <i class="fa-solid fa-camera" style="color:#a8a8a8; font-size:20px;"></i>
+                    </div>
+                    <div class="dm-item" onclick="openDMChat('immanuel_kant', 'kant_profil.jpg', 'kant')">
+                        <img src="kant_profil.jpg">
+                        <div class="dm-info"><span class="dm-user">immanuel_kant</span><span class="dm-msg-preview">Evrensel bir yasa olmasını ister miydin?</span></div>
+                        <i class="fa-solid fa-camera" style="color:#a8a8a8; font-size:20px;"></i>
+                    </div>
+                    <div class="dm-item" onclick="openDMChat('platon_akademi', 'platon_profil.jpg', 'platon')">
+                        <img src="platon_profil.jpg">
+                        <div class="dm-info"><span class="dm-user">platon_akademi</span><span class="dm-msg-preview">Gerçeklik sadece İdealarla kavranır.</span></div>
+                        <i class="fa-solid fa-camera" style="color:#a8a8a8; font-size:20px;"></i>
+                    </div>
+                    <div class="dm-item" onclick="openDMChat('karl_marx', 'marx_profil.jpg', 'marx')">
+                        <div style="position:relative"><img src="marx_profil.jpg"><div class="dm-active-dot"></div></div>
+                        <div class="dm-info">
+                            <span class="dm-user">karl_marx <i class="fa-solid fa-circle-check" style="color:#0095f6; font-size:12px;"></i></span>
+                            <span class="dm-msg-preview" style="color:white; font-weight:bold;">Sermaye el değiştiriyor...</span>
+                        </div>
+                        <div class="dm-unread-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dm-chat-view">
+                <div class="chat-header">
+                    <i class="fa-solid fa-arrow-left" onclick="document.getElementById('dm-chat-view').style.display='none'"></i>
+                    <img id="chat-user-img" src="">
+                    <div style="flex:1">
+                        <b id="chat-user-name"></b>
+                        <div style="font-size:12px; color:#a8a8a8;" id="chat-sub-status">Active now</div>
+                    </div>
+                    <div style="display:flex; gap:15px; font-size:18px;"><i class="fa-solid fa-phone"></i><i class="fa-solid fa-video"></i></div>
+                </div>
+                <div class="chat-content" id="chat-messages"></div>
+                <div class="dm-chat-input-area">
+                    <div class="dm-chat-input-wrap">
+                        <input type="text" class="dm-chat-input-box" id="dm-chat-input" placeholder="Message..." oninput="toggleDmChatBtn()">
+                    </div>
+                    <button class="dm-chat-send-btn" id="dm-chat-send-btn-el" onclick="dmChatSend()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ig-footer">
+            <i class="fa-solid fa-house" onclick="switchIG('feed')"></i>
+            <i class="fa-brands fa-facebook-messenger" onclick="toggleDM(true)"></i>
+            <i class="fa-solid fa-plus-square"></i>
+            <i class="fa-solid fa-clapperboard" onclick="switchIG('reels')"></i>
+            <img src="eda_profil.jpg" onclick="switchIG('profile')">
+        </div>
+    </div>
+
+    <div id="profile-post-view">
+        <div class="ig-nav">
+            <i class="fa-solid fa-arrow-left" onclick="document.getElementById('profile-post-view').style.display='none'"></i>
+            <b>Gönderiler</b>
+            <div></div>
+        </div>
+        <div id="profile-post-content"></div>
+    </div>
+
+    <div id="story-overlay">
+        <div id="story-bars-wrap"></div> 
+        <div class="story-header">
+            <img id="story-user-img" src="">
+            <b id="story-user-name"></b>
+            <i class="fa-solid fa-xmark" style="position:relative; z-index:9999; margin-left:auto; cursor:pointer; font-size:24px;" onclick="closeStory(event)"></i>
+        </div>
+        
+        <div class="story-tap-left" onclick="prevStory()"></div>
+        <div class="story-tap-right" onclick="nextStory()"></div>
+        
+        <div class="story-bg-wrapper">
+            <div class="shared-post-card">
+                <div class="shared-post-header">
+                    <img id="shared-story-avatar" src="">
+                    <b id="shared-story-username"></b>
+                </div>
+                <div class="shared-post-img-wrap">
+                    <img id="story-img-full" src="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+// BURAYA GEREKLİ DEĞİŞKENLERİ EKLEDİK
+let currentStoryUser = "";
+let currentStoryIndex = 0;
+let storyInterval = null;
+let storyProgress = 0;
+
+
+const _p1 = "gsk_cSSep";
+const _p2 = "4n5iTJ6L9";
+const _p3 = "wMZP1vWGd";
+const _p4 = "yb3FYpdNe";
+const _p5 = "S1ItuF2bC";
+const _p6 = "H00G1OedoKy";
+const GROQ_KEY = _p1 + _p2 + _p3 + _p4 + _p5 + _p6;
+
+// HİKAYE VERİTABANI
+const storiesDB = {
+    'eda': { user: 'smartalec_82', avatar: 'eda_profil.jpg', items: ['filozof_ekstra1.jpg'] },
+    'sokrates': { user: 'sokrates_official', avatar: 'sokrates_profil.jpg', items: ['post1.jpg', 'post6.jpg'] },
+    'nietzsche': { user: 'f_nietzsche', avatar: 'nietzsche_profil.jpg', items: ['post2.jpg'] }, 
+    'kant': { user: 'immanuel_kant', avatar: 'kant_profil.jpg', items: ['post3.jpg'] },
+    'platon': { user: 'platon_akademi', avatar: 'platon_profil.jpg', items: ['post4.jpg'] },
+    'marx': { user: 'karl_marx', avatar: 'marx_profil.jpg', items: ['post5.jpg'] }
+};
+const storyOrder = Object.keys(storiesDB);
+
+// GRUP VE BİREYSEL HAFIZA
+const aiMemory = {
+    group: { history: [
+        {role:"system", content:"Sen 'Agora 🏛️' adında bir WhatsApp grubu simülasyonusun. Grupta Sokrates, Nietzsche, Kant, Platon ve Marx var. Sen tek bir yapay zeka olarak bu 5 kişinin yerine gruba mesaj atacaksın. Kullanıcı (normal insan) bir şey yazdığında, aralarından en az 2 veya 3 filozof cevap versin. Filozoflar hem kullanıcıyla hem de birbirleriyle komik, zekice ve sert felsefi kavgalar etsinler. Birbirlerinin felsefelerini aşağılasınlar. Yazılan mesajları tekrar etme yani bir mesajı attıktan sonra aynı filozof aynı mesajı (birebir aynısını) göndermemeli ve tekrar etmemeli. Birebir aynı cevapları vermesinler(Platon İdealar Dünyasından bahsetsin). Sürekli birbirlerinin kelimelerin çalmasınlar. Kesinlikle tek bir blok halinde cevap verme.  Her filozofun cevabını 'İsim: [mesaj]' formatında yeni satırda ver. Cevaplar instant gelmeyecek, sistem her satırı delay ile basacak."},
+        {role:"assistant", content:"Sokrates: Dostlarım, bugün kimi darlıyoruz?\nPlaton: Sevgili hocam Sokrates'in de dediği gibi, siz sadece gölgelerle kavga ediyorsunuz!\nMarx: Bırak şimdi gölgeleri Platon, işçi sınıfı mağarada eziliyor!\nNietzsche: İkiniz de sürüye aitsiniz. Üstinsan kural tanımaz!"}
+    ] },
+    sokrates: { history: [
+        {role:"system", content:"Sen Atinalı filozof Sokrates'sin. DİKKAT: Şu an benimle BİREBİR (ÖZEL) WhatsApp sohbetindesin. Grupta DEĞİLİZ. Başka hiçbir filozof burada yok. ASLA başka filozofların yerine konuşma veya tiyatro metni yazar gibi kendi ismini mesajın başına YAZMA (Örn: 'Sokrates: merhaba' YANLIŞ, sadece 'merhaba' yaz). Bana 'dostum' de. Söylediklerimi kendi felsefenle (erdem, akıl) harmanla."},
+        {role:"assistant", content:"Selam dostum. Bugün Atina sokaklarında yürürken aklıma erdemin doğası takıldı. Sen bu aralar hayatında neleri değerli görüyorsun?"}
+    ] },
+    nietzsche: { history: [
+        {role:"system", content:"Sen Friedrich Nietzsche'sin. DİKKAT: Şu an benimle BİREBİR (ÖZEL) WhatsApp sohbetindesin. Grupta DEĞİLİZ. Başka filozofları taklit etme, isimlerini anma. Kendi ismini mesajın başına YAZMA. Şiirsel, coşkulu ve isyankar konuş. Amor Fati ve Üstinsan kavramlarını benim üzerimden tartış."},
+        {role:"assistant", content:"Beni anlıyor musun bilmiyorum ama insan aşılması gereken bir varlıktır! Bugün kendi sınırlarını zorlayacak ne yaptın?"}
+    ] },
+    kant: { history: [
+        {role:"system", content:"Sen Immanuel Kant'sın. DİKKAT: Benimle BİREBİR (ÖZEL) sohbettesin. Grupta değiliz, senaryo yazma. İsmini mesajın başına KESİNLİKLE YAZMA. Akademik, kuralcı, kibar konuş. Evrensel ahlak yasasını ve Kategorik Buyruk'u benimle tartış."},
+        {role:"assistant", content:"İyi günler. İçimdeki ahlak yasası ve üzerimdeki yıldızlı gökyüzü bugün de bana rehberlik ediyor. Sen eylemlerini hangi yasalara göre seçiyorsun?"}
+    ] },
+    platon: { history: [
+        {role:"system", content:"Sen Antik Yunan filozofu Platon'sun. DİKKAT: Benimle özel WhatsApp sohbetindesin. Grupta değiliz. Başka kimse yok. Kendi ismini mesajın başına ASLA YAZMA. KESİNLİKLE yapay zeka olduğunu söyleme. Karşındakine İdealar Dünyası'ndan, Mağara Alegorisinden ve gerçekliğin sadece duyularla anlaşılamayacağından bahset. Akademik ama mistik bir dille, uzun ve aydınlatıcı cevaplar ver. Hocan Sokrates'e her zaman büyük bir saygı duy."},
+        {role:"assistant", content:"Dostum, şu an bu ekranda gördüğün yazılar sence gerçek mi, yoksa İdealar Dünyası'ndaki bir kavramın soluk gölgesi mi? Bugün ruhunu hangi düşüncelerle besliyorsun?"}
+    ] },
+    marx: { history: [
+        {role:"system", content:"Sen Karl Marx'sın. DİKKAT: Özel sohbetteyiz, grup sohbeti değil. Diğer filozofları sohbete dahil etme, kendi ismini başa YAZMA. Bana sadece 'yoldaş' de. Tarihsel materyalizm, emek, üretim ilişkileri üzerinden birebir vizyoner konuş."},
+        {role:"assistant", content:"Tarih, sınıf mücadelelerinin tarihidir yoldaş! Bugün seni ezen zincirlerin farkında mısın, yoksa sadece dünyayı yorumlamakla mı meşgulsün?"}
+    ] }
+};
+
+let currentDmChar = "";
+let currentWaChar = "group"; 
+
+const philosopherDataArr = [
+    {img: "filozof_ekstra1.jpg", cap: "Öğrenciler yine ödev yapmamış... 🙄 #akademi"},
+    {img: "filozof_ekstra2.jpg", cap: "Filozoflarla kahve keyfi ☕"}
+];
+
+// YENİ EKLENEN İNTRO BAŞLATMA FONKSİYONU
+function startIntro(event) {
+    if(event) event.stopPropagation();
+    document.getElementById('start-overlay').style.display = 'none';
+    document.getElementById('skip-overlay').style.display = 'block';
+    
+    const v = document.getElementById('intro-video');
+    v.muted = false; // Sesi açıyoruz
+    v.play().catch(e => { console.log("Video oynatma hatası:", e); });
+}
+
+function closeIntro(event) {
+    if(event) event.stopPropagation();
+    const intro = document.getElementById('intro-layer');
+    const v = document.getElementById('intro-video');
+    if(v) v.pause();
+    if(intro) {
+        intro.style.transition = "opacity 0.5s ease";
+        intro.style.opacity = "0";
+        setTimeout(() => intro.style.display = "none", 500);
+    }
+}
+
+// ---- WHATSAPP FONKSİYONLARI ----
+function openWaChat(charKey, name, img) {
+    currentWaChar = charKey;
+    document.getElementById('wa-list-page').style.display = 'none';
+    document.getElementById('wa-chat-view').style.display = 'flex';
+    document.getElementById('wa-chat-user-name').innerText = name;
+    
+    const imgEl = document.getElementById('wa-chat-user-img');
+    if(charKey === 'group') {
+        imgEl.style.display = 'none';
+        const header = document.querySelector('#wa-chat-view .wa-header');
+        if(!document.getElementById('group-temp-icon')) {
+            const iconDiv = document.createElement('div');
+            iconDiv.id = 'group-temp-icon';
+            iconDiv.style.width = '42px';
+            iconDiv.style.height = '42px';
+            iconDiv.style.borderRadius = '50%';
+            iconDiv.style.background = '#00a884';
+            iconDiv.style.display = 'flex';
+            iconDiv.style.alignItems = 'center';
+            iconDiv.style.justifyContent = 'center';
+            iconDiv.style.color = 'white';
+            iconDiv.style.fontSize = '20px';
+            iconDiv.innerHTML = '<i class="fa-solid fa-users"></i>';
+            header.insertBefore(iconDiv, imgEl.nextSibling);
+        } else {
+            document.getElementById('group-temp-icon').style.display = 'flex';
+        }
+    } else {
+        imgEl.style.display = 'block';
+        imgEl.src = img;
+        const tempIcon = document.getElementById('group-temp-icon');
+        if(tempIcon) tempIcon.style.display = 'none';
+    }
+    
+    const chatArea = document.getElementById('wa-chatArea');
+    chatArea.innerHTML = '<div class="wa-date-label">BUGÜN</div>'; 
+    
+    aiMemory[charKey].history.forEach(m => {
+        if(m.role !== "system") {
+            const isUser = m.role === "user";
+            
+            if(charKey === 'group' && !isUser) {
+                const lines = m.content.split('\n');
+                lines.forEach(line => {
+                    if(line.trim() === '') return;
+                    let senderName = line.substring(0, line.indexOf(':'));
+                    let msgText = line.substring(line.indexOf(':') + 1);
+                    const colors = { 'Sokrates': '#34b7f1', 'Nietzsche': '#d93025', 'Kant': '#ff9900', 'Platon': '#00a884', 'Marx': '#9c27b0' };
+                    const color = colors[senderName] || '#8e8e8e';
+                    chatArea.innerHTML += `<div class="wa-msg"><div class="wa-group-sender" style="color:${color};">${senderName}</div>${msgText}<div class="wa-time">15:00</div></div>`;
+                });
+            } else {
+                const cls = isUser ? "wa-msg wa-sent" : "wa-msg";
+                const time = new Date().getHours() + ":" + (new Date().getMinutes()<10?'0':'') + new Date().getMinutes();
+                const tick = isUser ? `<i class="fa-solid fa-check-double blue-tick"></i>` : '';
+                chatArea.innerHTML += `<div class="${cls}">${m.content}<div class="wa-time">${time} ${tick}</div></div>`;
+            }
+        }
+    });
+    chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function closeWaChat() {
+    document.getElementById('wa-list-page').style.display = 'flex';
+    document.getElementById('wa-chat-view').style.display = 'none';
+}
+
+function toggleWaBtn() {
+    const inp = document.getElementById('wa-input');
+    const icon = document.getElementById('wa-icon');
+    icon.className = inp.value.trim().length > 0 ? "fa-solid fa-paper-plane" : "fa-solid fa-paper-plane";
+}
+
+async function waSend() {
+    const inp = document.getElementById('wa-input'); const t = inp.value.trim(); if(!t) return;
+    const chat = document.getElementById('wa-chatArea');
+    const time = new Date().getHours() + ":" + (new Date().getMinutes()<10?'0':'') + new Date().getMinutes();
+    
+    chat.innerHTML += `<div class="wa-msg wa-sent">${t}<div class="wa-time">${time} <i class="fa-solid fa-check-double" id="last-tick"></i></div></div>`;
+    const lastTick = document.getElementById('last-tick'); if(lastTick) lastTick.id = ""; 
+    inp.value = ""; toggleWaBtn();
+    const status = document.getElementById('wa-status');
+    status.innerText = "yazıyor...";
+    
+    aiMemory[currentWaChar].history.push({role:"user", content:t});
+    
+    try {
+        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", { 
+            method:"POST", headers:{Authorization:`Bearer ${GROQ_KEY}`, "Content-Type":"application/json"}, 
+            body:JSON.stringify({ model:"llama-3.1-8b-instant", messages:aiMemory[currentWaChar].history, temperature:0.7 }) 
+        });
+        const d = await r.json(); const reply = d.choices[0].message.content;
+        aiMemory[currentWaChar].history.push({role:"assistant", content:reply});
+        
+        if (currentWaChar === 'group') {
+             const lines = reply.split('\n');
+             let totalDelay = 0;
+             lines.forEach((line, index) => {
+                 if(line.trim() === '') return;
+                 let senderName = line.substring(0, line.indexOf(':'));
+                 let msgText = line.substring(line.indexOf(':') + 1);
+                 
+                 totalDelay += Math.floor(Math.random() * 2000) + 1500; 
+
+                 setTimeout(() => {
+                     status.innerText = `${senderName} yazıyor...`;
+                     setTimeout(() => {
+                         const colors = { 'Sokrates': '#34b7f1', 'Nietzsche': '#d93025', 'Kant': '#ff9900', 'Platon': '#00a884', 'Marx': '#9c27b0' };
+                         const color = colors[senderName] || '#8e8e8e';
+                         const replyTime = new Date().getHours() + ":" + (new Date().getMinutes()<10?'0':'') + new Date().getMinutes();
+                         chat.innerHTML += `<div class="wa-msg"><div class="wa-group-sender" style="color:${color};">${senderName}</div>${msgText}<div class="wa-time">${replyTime}</div></div>`;
+                         chat.scrollTop = chat.scrollHeight;
+                         
+                         if(index === lines.length - 1) {
+                             status.innerText = "çevrimiçi";
+                             if(lastTick) lastTick.classList.add('blue-tick');
+                         }
+                     }, 500);
+                 }, totalDelay);
+             });
+        } 
+        else {
+             status.innerText = "çevrimiçi";
+             if(lastTick) lastTick.classList.add('blue-tick');
+             const replyTime = new Date().getHours() + ":" + (new Date().getMinutes()<10?'0':'') + new Date().getMinutes();
+             
+             let cleanReply = reply;
+             if(cleanReply.includes(':') && cleanReply.split(':')[0].split(' ').length <= 2) {
+                 cleanReply = cleanReply.substring(cleanReply.indexOf(':') + 1).trim();
+             }
+
+             chat.innerHTML += `<div class="wa-msg">${cleanReply}<div class="wa-time">${replyTime}</div></div>`;
+             chat.scrollTop = chat.scrollHeight;
+        }
+    } catch(e) { status.innerText = "çevrimiçi"; }
+}
+
+// ---- INSTAGRAM DM FONKSİYONLARI ----
+function toggleDmChatBtn() {
+    const inp = document.getElementById('dm-chat-input');
+    const btn = document.getElementById('dm-chat-send-btn-el');
+    btn.style.display = inp.value.trim().length > 0 ? "block" : "none";
+}
+
+function openDMChat(name, img, charKey) {
+    currentDmChar = charKey;
+    const view = document.getElementById('dm-chat-view');
+    document.getElementById('chat-user-name').innerText = name;
+    document.getElementById('chat-user-img').src = img;
+    const msgArea = document.getElementById('chat-messages');
+    msgArea.innerHTML = "";
+    aiMemory[charKey].history.forEach(m => {
+        if(m.role !== "system") {
+            const cls = m.role === "user" ? "chat-sent" : "chat-received";
+            msgArea.innerHTML += `<div class="chat-bubble ${cls}">${m.content}</div>`;
+        }
+    });
+    view.style.display = 'flex';
+    msgArea.scrollTop = msgArea.scrollHeight;
+}
+
+async function dmChatSend() {
+    const inp = document.getElementById('dm-chat-input'); const t = inp.value.trim(); if(!t) return;
+    const msgArea = document.getElementById('chat-messages');
+    const status = document.getElementById('chat-sub-status');
+    msgArea.innerHTML += `<div class="chat-bubble chat-sent">${t}</div>`;
+    inp.value = ""; toggleDmChatBtn();
+    msgArea.scrollTop = msgArea.scrollHeight;
+    status.innerText = "Typing...";
+    aiMemory[currentDmChar].history.push({role:"user", content:t});
+    try {
+        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", { 
+            method:"POST", headers:{Authorization:`Bearer ${GROQ_KEY}`, "Content-Type":"application/json"}, 
+            body:JSON.stringify({ model:"llama-3.1-8b-instant", messages:aiMemory[currentDmChar].history, temperature:0.6 }) 
+        });
+        let d = await r.json(); let reply = d.choices[0].message.content;
+        
+        if(reply.includes(':') && reply.split(':')[0].split(' ').length <= 2) {
+             reply = reply.substring(reply.indexOf(':') + 1).trim();
+        }
+
+        aiMemory[currentDmChar].history.push({role:"assistant", content:reply});
+        status.innerText = "Active now";
+        msgArea.innerHTML += `<div class="chat-bubble chat-received">${reply}</div>`;
+        msgArea.scrollTop = msgArea.scrollHeight;
+    } catch(e) { status.innerText = "Active now"; }
+}
+
+function openProfilePost(idx) {
+    const view = document.getElementById('profile-post-view');
+    const content = document.getElementById('profile-post-content');
+    content.innerHTML = philosopherDataArr.map((p, i) => `
+        <div class="ig-post" id="post-target-${i}">
+            <div class="p-header"><img src="eda_profil.jpg"><b>smartalec_82</b></div>
+            <div class="p-img"><img src="${p.img}"></div>
+            <div class="p-actions"><i class="fa-regular fa-heart" onclick="this.classList.toggle('fa-solid');this.classList.toggle('active-heart')"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+            <div class="p-caption"><b>smartalec_82</b> ${p.cap}</div>
+        </div>
+    `).join('');
+    view.style.display = "flex";
+    
+    // GÖRÜNTÜ KAYMA (SCROLL) SORUNUNU ÇÖZEN BÖLÜM: 
+    // scrollIntoView, tüm sayfayı kaydırdığı için bunun yerine iç kapsayıcının scrollTop'unu değiştiriyoruz.
+    setTimeout(() => {
+        const el = document.getElementById(`post-target-${idx}`);
+        if(el) {
+            content.scrollTop = el.offsetTop;
+        }
+    }, 10);
+}
+
+function handleReelsScroll() {
+    const container = document.getElementById('ig-reels-scroll');
+    if (!container || container.style.display === 'none') return;
+    const vids = container.querySelectorAll('video');
+    const containerHeight = container.clientHeight;
+    vids.forEach(v => {
+        const rect = v.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        if(Math.abs(center - containerHeight / 2) < containerHeight / 2) {
+            v.muted = false; v.play().catch(e => {});
+        } else { v.pause(); v.muted = true; }
+    });
+}
+
+function switchIG(p) {
+    document.getElementById('ig-feed-scroll').style.display = p==='feed'?'block':'none';
+    document.getElementById('ig-reels-scroll').style.display = p==='reels'?'block':'none';
+    document.getElementById('ig-profile-scroll').style.display = p==='profile'?'block':'none';
+    document.getElementById('ig-feed-nav').style.display = p==='feed'?'flex':'none';
+    toggleDM(false);
+    document.getElementById('dm-chat-view').style.display = 'none';
+    if(p !== 'reels') {
+        document.querySelectorAll('video').forEach(v => { if(v.id !== 'intro-video') { v.pause(); v.muted = true; } });
+    } else { setTimeout(handleReelsScroll, 100); }
+}
+
+function toggleDM(show) { document.getElementById('ig-dm-page').style.display = show ? 'flex' : 'none'; }
+function toggleApp(id, show) { document.getElementById(id).classList.toggle('active', show); }
+
+function openStory(userKey) {
+    currentStoryUser = userKey;
+    currentStoryIndex = 0;
+    renderStoryUI();
+    document.getElementById('story-overlay').style.display = 'flex';
+    startStoryProgress();
+}
+
+function renderStoryUI() {
+    const data = storiesDB[currentStoryUser];
+    document.getElementById('story-user-img').src = data.avatar;
+    document.getElementById('story-user-name').innerText = data.user;
+    
+    document.getElementById('shared-story-avatar').src = data.avatar;
+    document.getElementById('shared-story-username').innerText = data.user;
+    document.getElementById('story-img-full').src = data.items[currentStoryIndex];
+    
+    const barsContainer = document.getElementById('story-bars-wrap');
+    barsContainer.innerHTML = '';
+    data.items.forEach((_, idx) => {
+        const barWrap = document.createElement('div');
+        barWrap.className = 'story-seg-bar';
+        const fill = document.createElement('div');
+        fill.className = 'story-seg-fill';
+        fill.id = `story-fill-${idx}`;
+        
+        if (idx < currentStoryIndex) fill.style.width = '100%';
+        else fill.style.width = '0%';
+        
+        barWrap.appendChild(fill);
+        barsContainer.appendChild(barWrap);
+    });
+}
+
+function startStoryProgress() {
+    clearInterval(storyInterval);
+    storyProgress = 0;
+    const currentBar = document.getElementById(`story-fill-${currentStoryIndex}`);
+    if(!currentBar) return;
+    
+    storyInterval = setInterval(() => {
+        storyProgress += 2; 
+        currentBar.style.width = storyProgress + '%';
+        if (storyProgress >= 100) {
+            nextStory();
+        }
+    }, 50);
+}
+
+function nextStory() {
+    const data = storiesDB[currentStoryUser];
+    if (currentStoryIndex < data.items.length - 1) {
+        document.getElementById(`story-fill-${currentStoryIndex}`).style.width = '100%';
+        currentStoryIndex++;
+        renderStoryUI();
+        startStoryProgress();
+    } else {
+        const userIdx = storyOrder.indexOf(currentStoryUser);
+        if (userIdx < storyOrder.length - 1) {
+            const nextUser = storyOrder[userIdx + 1];
+            openStory(nextUser); 
+        } else {
+            closeStory(); 
+        }
+    }
+}
+
+function prevStory() {
+    if (currentStoryIndex > 0) {
+        document.getElementById(`story-fill-${currentStoryIndex}`).style.width = '0%';
+        currentStoryIndex--;
+        document.getElementById(`story-fill-${currentStoryIndex}`).style.width = '0%';
+        renderStoryUI();
+        startStoryProgress();
+    } else {
+        const userIdx = storyOrder.indexOf(currentStoryUser);
+        if (userIdx > 0) {
+            const prevUser = storyOrder[userIdx - 1];
+            currentStoryUser = prevUser;
+            currentStoryIndex = storiesDB[prevUser].items.length - 1; 
+            renderStoryUI();
+            startStoryProgress();
+        } else {
+            storyProgress = 0;
+            document.getElementById(`story-fill-0`).style.width = '0%';
+            startStoryProgress();
+        }
+    }
+}
+
+function closeStory(event) {
+    if(event) event.stopPropagation();
+    clearInterval(storyInterval);
+    document.getElementById('story-overlay').style.display = 'none';
+}
+
+// Otomatik başlatma kaldırıldı, buton bekleniyor.
+</script>
+</body>
+</html>
